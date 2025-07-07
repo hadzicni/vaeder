@@ -14,6 +14,7 @@ class _WeatherPageState extends State<WeatherPage>
     with TickerProviderStateMixin {
   final _weatherService = WeatherService('0bd21cf6023274a9818128f4eb1f4c79');
   Weather? _weather;
+  String? _currentLocationCity;
   bool _isLoading = true;
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -36,12 +37,10 @@ class _WeatherPageState extends State<WeatherPage>
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
         );
-
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -61,23 +60,31 @@ class _WeatherPageState extends State<WeatherPage>
     });
 
     try {
-      String cityName = await _weatherService.getCurrentCity();
+      final cityName = await _weatherService.getCurrentCity();
       final weather = await _weatherService.getWeather(cityName);
 
       if (mounted) {
         setState(() {
+          _currentLocationCity = cityName;
           _weather = weather;
           _isLoading = false;
         });
+
+        if (_slideController.isAnimating) _slideController.stop();
+        if (_fadeController.isAnimating) _fadeController.stop();
+
         _slideController.forward();
         _fadeController.forward();
       }
     } catch (e) {
-      print('Error: $e');
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error fetching weather data'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -95,17 +102,42 @@ class _WeatherPageState extends State<WeatherPage>
           _weather = weather;
           _isLoading = false;
         });
+
+        if (_slideController.isAnimating) _slideController.stop();
+        if (_fadeController.isAnimating) _fadeController.stop();
+
         _slideController.forward();
         _fadeController.forward();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Switched to ${_capitalizeWords(city)}'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
-      print('Error: $e');
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error fetching weather data'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
+  }
+
+  String _capitalizeWords(String input) {
+    return input
+        .split(' ')
+        .map(
+          (word) => word.isEmpty
+              ? ''
+              : '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}',
+        )
+        .join(' ');
   }
 
   Future<void> _showCityInputDialog() async {
@@ -136,29 +168,23 @@ class _WeatherPageState extends State<WeatherPage>
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Enter city name',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                    hintStyle: TextStyle(color: Colors.white.withAlpha(128)),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.05),
+                    fillColor: Colors.white.withAlpha(13),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 14,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: Colors.white.withOpacity(0.2),
-                      ),
+                      borderSide: BorderSide(color: Colors.white.withAlpha(51)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: Colors.white.withOpacity(0.2),
-                      ),
+                      borderSide: BorderSide(color: Colors.white.withAlpha(51)),
                     ),
                   ),
-                  onChanged: (value) {
-                    cityName = value;
-                  },
+                  onChanged: (value) => cityName = value,
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -168,10 +194,7 @@ class _WeatherPageState extends State<WeatherPage>
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text(
                         'Cancel',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(color: Colors.white.withAlpha(179)),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -186,10 +209,7 @@ class _WeatherPageState extends State<WeatherPage>
                       },
                       child: const Text(
                         'OK',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ],
@@ -270,7 +290,7 @@ class _WeatherPageState extends State<WeatherPage>
             colors: _weather == null
                 ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
                 : [
-                    getWeatherColor(_weather?.mainCondition).withOpacity(0.8),
+                    getWeatherColor(_weather?.mainCondition).withAlpha(204),
                     const Color(0xFF0F172A),
                   ],
           ),
@@ -294,12 +314,9 @@ class _WeatherPageState extends State<WeatherPage>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withAlpha(25),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
-                width: 1,
-              ),
+              border: Border.all(color: Colors.white.withAlpha(51)),
             ),
             child: const CircularProgressIndicator(
               color: Colors.white,
@@ -309,11 +326,7 @@ class _WeatherPageState extends State<WeatherPage>
           const SizedBox(height: 20),
           Text(
             'Loading weather...',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-              fontWeight: FontWeight.w300,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(179)),
           ),
         ],
       ),
@@ -327,20 +340,14 @@ class _WeatherPageState extends State<WeatherPage>
         children: [
           Icon(
             Icons.error_outline,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withAlpha(179),
             size: 64,
           ),
           const SizedBox(height: 20),
           Text(
             'Failed to load weather data',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-              fontWeight: FontWeight.w300,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(179)),
           ),
-          const SizedBox(height: 20),
-          _buildRefreshButton(),
         ],
       ),
     );
@@ -351,9 +358,17 @@ class _WeatherPageState extends State<WeatherPage>
       opacity: _fadeAnimation,
       child: SlideTransition(
         position: _slideAnimation,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _slideController.reset();
+            _fadeController.reset();
+            await _fetchWeather();
+          },
+          backgroundColor: const Color(0xFF1E293B),
+          color: Colors.white,
           child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
                 _buildHeader(),
@@ -364,13 +379,17 @@ class _WeatherPageState extends State<WeatherPage>
                 const SizedBox(height: 40),
                 _buildWeatherDetails(),
                 const SizedBox(height: 40),
-                _buildRefreshButton(),
-                const SizedBox(height: 20),
+                if (_currentLocationCity != null &&
+                    _weather?.cityName.trim().toLowerCase() !=
+                        _currentLocationCity!.trim().toLowerCase()) ...[
+                  _buildResetToCurrentLocationButton(),
+                  const SizedBox(height: 20),
+                ],
                 Text(
                   'Made by Nikola Hadzic',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withAlpha(128),
                     letterSpacing: 1.0,
                   ),
                 ),
@@ -382,20 +401,57 @@ class _WeatherPageState extends State<WeatherPage>
     );
   }
 
+  Widget _buildResetToCurrentLocationButton() {
+    return GestureDetector(
+      onTap: () {
+        _slideController.reset();
+        _fadeController.reset();
+        _fetchWeather();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withAlpha(25),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.white.withAlpha(77), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.my_location,
+              color: Colors.white.withAlpha(204),
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Use current location',
+              style: TextStyle(
+                color: Colors.white.withAlpha(204),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withAlpha(25),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        border: Border.all(color: Colors.white.withAlpha(51), width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.location_on_rounded,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withAlpha(230),
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -404,8 +460,7 @@ class _WeatherPageState extends State<WeatherPage>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.9),
-              letterSpacing: 1.5,
+              color: Colors.white.withAlpha(230),
             ),
           ),
         ],
@@ -417,9 +472,9 @@ class _WeatherPageState extends State<WeatherPage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withAlpha(13),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        border: Border.all(color: Colors.white.withAlpha(25)),
       ),
       child: Lottie.asset(
         getWeatherAnimation(_weather?.mainCondition),
@@ -433,12 +488,12 @@ class _WeatherPageState extends State<WeatherPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withAlpha(25),
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        border: Border.all(color: Colors.white.withAlpha(51)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha(25),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -452,7 +507,6 @@ class _WeatherPageState extends State<WeatherPage>
               fontSize: 72,
               fontWeight: FontWeight.w200,
               color: Colors.white,
-              height: 1.0,
             ),
           ),
           const SizedBox(height: 8),
@@ -461,8 +515,7 @@ class _WeatherPageState extends State<WeatherPage>
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Colors.white.withOpacity(0.8),
-              letterSpacing: 2.0,
+              color: Colors.white.withAlpha(204),
             ),
           ),
         ],
@@ -474,9 +527,9 @@ class _WeatherPageState extends State<WeatherPage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withAlpha(13),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        border: Border.all(color: Colors.white.withAlpha(25)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -486,7 +539,7 @@ class _WeatherPageState extends State<WeatherPage>
             label: 'FEELS LIKE',
             value: '${(_weather!.temperature + 2).round()}°',
           ),
-          Container(width: 1, height: 40, color: Colors.white.withOpacity(0.2)),
+          Container(width: 1, height: 40, color: Colors.white.withAlpha(51)),
           _buildDetailItem(
             icon: Icons.air_rounded,
             label: 'CONDITION',
@@ -504,15 +557,14 @@ class _WeatherPageState extends State<WeatherPage>
   }) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.7), size: 24),
+        Icon(icon, color: Colors.white.withAlpha(179), size: 24),
         const SizedBox(height: 8),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.6),
-            letterSpacing: 1.0,
+            color: Colors.white.withAlpha(153),
           ),
         ),
         const SizedBox(height: 4),
@@ -521,47 +573,10 @@ class _WeatherPageState extends State<WeatherPage>
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withAlpha(230),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildRefreshButton() {
-    return GestureDetector(
-      onTap: () {
-        _slideController.reset();
-        _fadeController.reset();
-        _fetchWeather();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.refresh_rounded,
-              color: Colors.white.withOpacity(0.8),
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Refresh',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
