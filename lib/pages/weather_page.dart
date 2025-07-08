@@ -453,6 +453,10 @@ class _WeatherPageState extends State<WeatherPage>
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: PopupMenuButton<String>(
+              color: Colors.transparent,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              offset: const Offset(0, 40),
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -469,14 +473,39 @@ class _WeatherPageState extends State<WeatherPage>
                 if (value == 'about') _showAboutDialog();
               },
               itemBuilder: (BuildContext context) => [
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'about',
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline),
-                      SizedBox(width: 8),
-                      Text('About'),
-                    ],
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.info_outline,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      title: Text(
+                        'About',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showAboutDialog();
+                      },
+                    ),
                   ),
                 ),
               ],
