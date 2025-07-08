@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'pages/weather_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const VaederApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class VaederApp extends StatelessWidget {
+  const VaederApp({super.key});
 
   @override
   Widget build(BuildContext context) {
