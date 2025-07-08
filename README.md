@@ -1,16 +1,44 @@
 # VAEDER
 
-A new Flutter project.
+"Vaeder" is a modern weather application built with [Flutter](https://flutter.dev/). It uses geolocation and geocoding packages to detect the current device location and retrieves weather information from the OpenWeatherMap API.
 
-## Getting Started
+## Features
+- Display of current weather for the user's location
+- Animated weather illustrations using Lottie
+- Support for Android, iOS, Web, Windows, macOS and Linux
 
-This project is a starting point for a Flutter application.
+## Requirements
+- Flutter SDK 3.8 or higher
+- API key from [OpenWeatherMap](https://openweathermap.org/)
 
-A few resources to get you started if this is your first Flutter project:
+## Setup
+1. Clone the repository and install dependencies:
+   ```bash
+   flutter pub get
+   ```
+2. Optional: Insert your API key in `lib/services/weather_service.dart`.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Running the app
+- Mobile/Web:
+  ```bash
+  flutter run
+  ```
+- Desktop (e.g. Windows):
+  ```bash
+  flutter run -d windows
+  ```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Project structure
+- **lib/** source code for models, pages and services
+- **assets/** graphics, Lottie animations and fonts
+- **test/** example widget tests
+- Platform directories for Android, iOS, Web and desktop
+
+## Running tests
+To execute the provided widget tests:
+```bash
+flutter test
+```
+
+## License
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
