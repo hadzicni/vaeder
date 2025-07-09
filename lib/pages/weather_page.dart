@@ -576,6 +576,27 @@ class _WeatherPageState extends State<WeatherPage>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leadingWidth: 180,
+        leading: Container(
+          margin: const EdgeInsets.only(left: 12),
+          child: TextButton.icon(
+            onPressed: _showCityInputDialog,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              backgroundColor: Colors.white.withOpacity(0.2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const Icon(Icons.search, size: 20),
+            label: const Text(
+              'Search location',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ),
+
         actions: [
           IconButton(
             onPressed: _toggleFavorite,
@@ -589,28 +610,6 @@ class _WeatherPageState extends State<WeatherPage>
           IconButton(
             onPressed: _showFavoritesSheet,
             icon: const Icon(Icons.list, color: Colors.white),
-          ),
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: TextButton.icon(
-              onPressed: _showCityInputDialog,
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                backgroundColor: Colors.white.withOpacity(0.2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.search, size: 20),
-              label: const Text(
-                'Search location',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-            ),
           ),
           Container(
             margin: const EdgeInsets.only(right: 16),
@@ -775,6 +774,7 @@ class _WeatherPageState extends State<WeatherPage>
           ),
         ],
       ),
+
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
