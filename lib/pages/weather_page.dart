@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vaeder/models/weather_model.dart';
 import 'package:vaeder/services/weather_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'forecast_page.dart';
+
 import '../utils/weather_utils.dart';
+import '../widgets/error_display.dart';
 import '../widgets/footer.dart';
 import '../widgets/header.dart';
 import '../widgets/loading_widget.dart';
-import '../widgets/error_display.dart';
 import '../widgets/reset_location_button.dart';
 import '../widgets/temperature_card.dart';
 import '../widgets/weather_animation.dart';
 import '../widgets/weather_details.dart';
+import 'forecast_page.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -62,8 +63,8 @@ class _WeatherPageState extends State<WeatherPage>
 
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0.0, 0.5), end: Offset.zero).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOutExpo),
-    );
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutExpo),
+        );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
@@ -90,8 +91,7 @@ class _WeatherPageState extends State<WeatherPage>
 
     try {
       final cityName = await _weatherService.getCurrentCity();
-      final weather =
-          await _weatherService.getWeather(cityName, units: _units);
+      final weather = await _weatherService.getWeather(cityName, units: _units);
 
       if (mounted) {
         setState(() {
@@ -382,8 +382,7 @@ class _WeatherPageState extends State<WeatherPage>
     });
 
     try {
-      final weather =
-          await _weatherService.getWeather(city, units: _units);
+      final weather = await _weatherService.getWeather(city, units: _units);
 
       if (mounted) {
         setState(() {
@@ -569,7 +568,6 @@ class _WeatherPageState extends State<WeatherPage>
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -789,19 +787,19 @@ class _WeatherPageState extends State<WeatherPage>
           child: _isLoading
               ? _buildLoadingWidget()
               : _weather == null
-                  ? _buildErrorWidget()
-                  : PageView(
-                      controller: _pageController,
-                      children: [
-                        _buildWeatherContent(),
-                        ForecastPage(
-                          city: _weather!.cityName,
-                          units: _units,
-                          showBack: false,
-                          backgroundColors: _getBackgroundColors(),
-                        ),
-                      ],
+              ? _buildErrorWidget()
+              : PageView(
+                  controller: _pageController,
+                  children: [
+                    _buildWeatherContent(),
+                    ForecastPage(
+                      city: _weather!.cityName,
+                      units: _units,
+                      showBack: false,
+                      backgroundColors: _getBackgroundColors(),
                     ),
+                  ],
+                ),
         ),
       ),
     );
@@ -825,8 +823,9 @@ class _WeatherPageState extends State<WeatherPage>
             _resetAnimations();
             await _fetchWeather();
           },
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: Colors.white.withOpacity(0.2),
           color: Colors.white,
+
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(20),
