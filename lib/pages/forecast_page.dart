@@ -198,6 +198,68 @@ class _ForecastCard extends StatelessWidget {
     }
   }
 
+  void _showDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${_getWeekday(day.date)}, ${day.date.day}. ${_getMonth(day.date)} ${day.date.year}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Condition: ${day.mainCondition}',
+                style: TextStyle(color: Colors.white.withOpacity(0.9)),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Temperature: ${day.temperature.round()}°$symbol',
+                style: TextStyle(color: Colors.white.withOpacity(0.9)),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Min: ${(day.temperature - 5).round()}° / Max: ${(day.temperature + 3).round()}°',
+                style: TextStyle(color: Colors.white.withOpacity(0.9)),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
@@ -235,16 +297,7 @@ class _ForecastCard extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Details for ${day.date.day}.${day.date.month}',
-                        ),
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                      ),
-                    );
-                  },
+                  onTap: () => _showDetails(context),
                   borderRadius: BorderRadius.circular(24),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
