@@ -198,25 +198,45 @@ class _WeatherPageState extends State<WeatherPage>
                 )
               else
                 ..._favoriteCities.map(
-                  (city) => ListTile(
-                    title: Text(
-                      city,
-                      style: const TextStyle(color: Colors.white),
+                  (city) => Dismissible(
+                    key: ValueKey(city),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.white),
-                      onPressed: () {
-                        setState(() {
-                          _favoriteCities.remove(city);
-                        });
-                        _saveFavorites();
+                    onDismissed: (_) {
+                      setState(() {
+                        _favoriteCities.remove(city);
+                      });
+                      _saveFavorites();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Removed $city from favorites'),
+                          backgroundColor: const Color(0xFFEF4444),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          margin: const EdgeInsets.all(16),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      title: Text(
+                        city,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
                         Navigator.pop(context);
+                        _fetchWeatherForCity(city);
                       },
                     ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _fetchWeatherForCity(city);
-                    },
                   ),
                 ),
             ],
