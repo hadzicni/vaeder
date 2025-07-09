@@ -1,4 +1,3 @@
-import '../utils/country_names.dart';
 
 class Weather {
   final String cityName;
@@ -13,9 +12,7 @@ class Weather {
     required this.mainCondition,
   });
 
-  factory Weather.fromJson(Map<String, dynamic> json) {
-    final code = json['sys']['country'] as String;
-    final countryName = countryNames[code] ?? code;
+  factory Weather.fromJson(Map<String, dynamic> json, String countryName) {
     return Weather(
       cityName: json['name'] as String,
       country: countryName,
