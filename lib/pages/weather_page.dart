@@ -800,6 +800,7 @@ class _WeatherPageState extends State<WeatherPage>
                         ForecastPage(
                           city: _weather!.cityName,
                           units: _units,
+                          showBack: false,
                         ),
                       ],
                     ),
