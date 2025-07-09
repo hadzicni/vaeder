@@ -39,6 +39,7 @@ dependencies:
   geolocator: ^14.0.2
   geocoding: ^4.0.0
   lottie: ^3.3.1
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
@@ -57,6 +58,20 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icons/app_icon.png"
   adaptive_icon_foreground: "assets/icons/app_icon.png"
+
+flutter_native_splash:
+  color: "#24303e"
+  image: assets/icons/app_icon.png
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
+  fullscreen: true
+
+  android_12:
+    image: assets/icons/app_icon.png
+    icon_background_color: "#24303e"
+    icon_background_color_dark: "#24303e"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

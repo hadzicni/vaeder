@@ -11,9 +11,12 @@ class VaederApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: WeatherPage(),
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.light(),
+      themeMode: ThemeMode.light,
+      home: const WeatherPage(),
     );
   }
 }
