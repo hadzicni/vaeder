@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class TemperatureCard extends StatelessWidget {
   final double temperature;
   final String condition;
+  final String unitSymbol;
 
   const TemperatureCard({
     super.key,
     required this.temperature,
     required this.condition,
+    required this.unitSymbol,
   });
 
   @override
@@ -29,7 +31,7 @@ class TemperatureCard extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            '${temperature.round()}°',
+            '${temperature.round()}°$unitSymbol',
             style: const TextStyle(
               fontSize: 76,
               fontWeight: FontWeight.w200,

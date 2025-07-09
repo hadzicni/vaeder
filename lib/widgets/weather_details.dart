@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class WeatherDetails extends StatelessWidget {
   final double feelsLike;
   final String condition;
+  final String unitSymbol;
 
   const WeatherDetails({
     super.key,
     required this.feelsLike,
     required this.condition,
+    required this.unitSymbol,
   });
 
   @override
@@ -33,7 +35,7 @@ class WeatherDetails extends StatelessWidget {
               child: _DetailItem(
                 icon: Icons.thermostat_rounded,
                 label: 'FEELS LIKE',
-                value: '${feelsLike.round()}°',
+                value: '${feelsLike.round()}°$unitSymbol',
               ),
             ),
             Container(
