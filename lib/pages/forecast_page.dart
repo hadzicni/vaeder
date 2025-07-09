@@ -8,12 +8,14 @@ class ForecastPage extends StatefulWidget {
   final String city;
   final String units;
   final bool showBack;
+  final List<Color>? backgroundColors;
 
   const ForecastPage({
     super.key,
     required this.city,
     required this.units,
     this.showBack = true,
+    this.backgroundColors,
   });
 
   @override
@@ -131,18 +133,21 @@ class _ForecastPageState extends State<ForecastPage> {
 
   @override
   Widget build(BuildContext context) {
+    final gradientColors = widget.backgroundColors ??
+        (_forecast.isEmpty
+            ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
+            : [
+                ...getWeatherGradient(_forecast.first.mainCondition),
+                const Color(0xFF0F172A),
+              ]);
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: _forecast.isEmpty
-                ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
-                : [
-                    ...getWeatherGradient(_forecast.first.mainCondition),
-                    const Color(0xFF0F172A),
-                  ],
+            colors: gradientColors,
           ),
         ),
         child: SafeArea(

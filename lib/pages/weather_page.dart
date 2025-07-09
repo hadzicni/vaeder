@@ -646,6 +646,7 @@ class _WeatherPageState extends State<WeatherPage>
                         builder: (_) => ForecastPage(
                           city: _weather!.cityName,
                           units: _units,
+                          backgroundColors: _getBackgroundColors(),
                         ),
                       ),
                     );
@@ -690,6 +691,7 @@ class _WeatherPageState extends State<WeatherPage>
                               builder: (_) => ForecastPage(
                                 city: _weather!.cityName,
                                 units: _units,
+                                backgroundColors: _getBackgroundColors(),
                               ),
                             ),
                           );
@@ -780,12 +782,7 @@ class _WeatherPageState extends State<WeatherPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: _weather == null
-                ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
-                : [
-                    ...getWeatherGradient(_weather?.mainCondition),
-                    const Color(0xFF0F172A),
-                  ],
+            colors: _getBackgroundColors(),
           ),
         ),
         child: SafeArea(
@@ -801,6 +798,7 @@ class _WeatherPageState extends State<WeatherPage>
                           city: _weather!.cityName,
                           units: _units,
                           showBack: false,
+                          backgroundColors: _getBackgroundColors(),
                         ),
                       ],
                     ),
@@ -896,5 +894,15 @@ class _WeatherPageState extends State<WeatherPage>
 
   Widget _buildFooter() {
     return const Footer();
+  }
+
+  List<Color> _getBackgroundColors() {
+    if (_weather == null) {
+      return [const Color(0xFF0F172A), const Color(0xFF1E293B)];
+    }
+    return [
+      ...getWeatherGradient(_weather!.mainCondition),
+      const Color(0xFF0F172A),
+    ];
   }
 }
