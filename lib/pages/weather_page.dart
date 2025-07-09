@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:vaeder/models/weather_model.dart';
 import 'package:vaeder/services/weather_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -15,6 +16,7 @@ class _WeatherPageState extends State<WeatherPage>
   final _weatherService = WeatherService('0bd21cf6023274a9818128f4eb1f4c79');
   Weather? _weather;
   String? _currentLocationCity;
+  List<String> _favoriteCities = [];
   bool _isLoading = true;
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -27,6 +29,7 @@ class _WeatherPageState extends State<WeatherPage>
   void initState() {
     super.initState();
     _initializeAnimations();
+    _loadFavorites();
     _fetchWeather();
   }
 
@@ -46,8 +49,8 @@ class _WeatherPageState extends State<WeatherPage>
 
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0.0, 0.5), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutExpo),
-        );
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutExpo),
+    );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
@@ -113,6 +116,133 @@ class _WeatherPageState extends State<WeatherPage>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
+    );
+  }
+
+  Future<void> _loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _favoriteCities = prefs.getStringList('favoriteCities') ?? [];
+    });
+  }
+
+  Future<void> _saveFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favoriteCities', _favoriteCities);
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (_weather == null) return;
+    final city = _weather!.cityName;
+    setState(() {
+      if (_favoriteCities.contains(city)) {
+        _favoriteCities.remove(city);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Removed $city from favorites'),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      } else {
+        _favoriteCities.add(city);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added $city to favorites'),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    });
+    await _saveFavorites();
+  }
+
+  void _showFavoritesSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Favorites',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (_favoriteCities.isEmpty)
+                Text(
+                  'No favorites added',
+                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                )
+              else
+                ..._favoriteCities.map(
+                  (city) => Dismissible(
+                    key: ValueKey(city),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    onDismissed: (_) {
+                      setState(() {
+                        _favoriteCities.remove(city);
+                      });
+                      _saveFavorites();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Removed $city from favorites'),
+                          backgroundColor: const Color(0xFFEF4444),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          margin: const EdgeInsets.all(16),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      title: Text(
+                        city,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _fetchWeatherForCity(city);
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -457,6 +587,19 @@ class _WeatherPageState extends State<WeatherPage>
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          IconButton(
+            onPressed: _toggleFavorite,
+            icon: Icon(
+              _weather != null && _favoriteCities.contains(_weather!.cityName)
+                  ? Icons.star
+                  : Icons.star_border,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            onPressed: _showFavoritesSheet,
+            icon: const Icon(Icons.list, color: Colors.white),
+          ),
           Container(
             margin: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
@@ -479,7 +622,6 @@ class _WeatherPageState extends State<WeatherPage>
               ),
             ),
           ),
-
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: PopupMenuButton<String>(
@@ -560,8 +702,8 @@ class _WeatherPageState extends State<WeatherPage>
           child: _isLoading
               ? _buildLoadingWidget()
               : _weather == null
-              ? _buildErrorWidget()
-              : _buildWeatherContent(),
+                  ? _buildErrorWidget()
+                  : _buildWeatherContent(),
         ),
       ),
     );
@@ -722,14 +864,28 @@ class _WeatherPageState extends State<WeatherPage>
               ),
             ),
             const SizedBox(width: 12),
-            Text(
-              _weather!.cityName.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                letterSpacing: 1.2,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _weather!.cityName.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _weather!.country,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
