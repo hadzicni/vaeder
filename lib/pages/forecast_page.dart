@@ -159,7 +159,7 @@ class _ForecastCard extends StatelessWidget {
   });
 
   String _getWeekday(DateTime date) {
-    final weekdays = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    final weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return weekdays[date.weekday % 7];
   }
 
@@ -174,7 +174,7 @@ class _ForecastCard extends StatelessWidget {
       'Jul',
       'Aug',
       'Sep',
-      'Okt',
+      'Oct',
       'Nov',
       'Dec',
     ];
