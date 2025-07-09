@@ -28,6 +28,7 @@ class _WeatherPageState extends State<WeatherPage>
   List<String> _favoriteCities = [];
   String _units = 'metric';
   bool _isLoading = true;
+  late PageController _pageController;
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late AnimationController _scaleController;
@@ -38,6 +39,7 @@ class _WeatherPageState extends State<WeatherPage>
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _initializeAnimations();
     _loadUnits();
     _loadFavorites();
@@ -74,6 +76,7 @@ class _WeatherPageState extends State<WeatherPage>
 
   @override
   void dispose() {
+    _pageController.dispose();
     _slideController.dispose();
     _fadeController.dispose();
     _scaleController.dispose();
@@ -790,7 +793,16 @@ class _WeatherPageState extends State<WeatherPage>
               ? _buildLoadingWidget()
               : _weather == null
                   ? _buildErrorWidget()
-                  : _buildWeatherContent(),
+                  : PageView(
+                      controller: _pageController,
+                      children: [
+                        _buildWeatherContent(),
+                        ForecastPage(
+                          city: _weather!.cityName,
+                          units: _units,
+                        ),
+                      ],
+                    ),
         ),
       ),
     );

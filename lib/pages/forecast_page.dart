@@ -42,6 +42,18 @@ class _ForecastPageState extends State<ForecastPage> {
   }
 
   @override
+  void didUpdateWidget(covariant ForecastPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.city != widget.city || oldWidget.units != widget.units) {
+      setState(() {
+        _isLoading = true;
+        _forecast = [];
+      });
+      _loadForecast();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

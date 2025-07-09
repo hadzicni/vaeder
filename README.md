@@ -8,6 +8,7 @@
 - Support for Android, iOS, Web, Windows, macOS and Linux
 - Switch between Celsius and Fahrenheit
 - View a 5 day forecast
+- Swipe horizontally to access the forecast page
 
 ## Requirements
 - Flutter SDK 3.8 or higher
