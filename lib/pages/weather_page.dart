@@ -439,82 +439,71 @@ class _WeatherPageState extends State<WeatherPage>
         .join(' ');
   }
 
-  Future<void> _showCityInputDialog() async {
+  void _showCityInputBottomSheet() {
     final controller = TextEditingController();
     bool isValid = false;
 
-    await showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
                         Icons.location_city,
                         color: Colors.white,
-                        size: 32,
+                        size: 28,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     const Text(
-                      'Change City',
+                      'Enter city name',
                       style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
                         color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     TextField(
                       controller: controller,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText: 'Enter city name',
+                        hintText: 'e.g. New York',
                         hintStyle: TextStyle(
                           color: Colors.white.withOpacity(0.5),
                         ),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.1),
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
+                          horizontal: 16,
+                          vertical: 14,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.white),
                         ),
                       ),
                       onChanged: (value) {
@@ -522,56 +511,33 @@ class _WeatherPageState extends State<WeatherPage>
                           isValid = value.trim().isNotEmpty;
                         });
                       },
+                      onSubmitted: (value) {
+                        if (value.trim().isNotEmpty) {
+                          Navigator.pop(context);
+                          _fetchWeatherForCity(value.trim());
+                        }
+                      },
                     ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              'Cancel',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                            ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isValid
+                            ? () {
+                                Navigator.pop(context);
+                                _fetchWeatherForCity(controller.text.trim());
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF1E293B),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: isValid
-                                ? () {
-                                    Navigator.of(context).pop();
-                                    _fetchWeatherForCity(
-                                      controller.text.trim(),
-                                    );
-                                  }
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1E293B),
-                              disabledForegroundColor: Colors.white.withOpacity(
-                                0.5,
-                              ),
-                              disabledBackgroundColor: Colors.white.withOpacity(
-                                0.1,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text('Search'),
-                          ),
-                        ),
-                      ],
+                        child: const Text('Search'),
+                      ),
                     ),
                   ],
                 ),
@@ -590,7 +556,7 @@ class _WeatherPageState extends State<WeatherPage>
       appBar: _isLoading
           ? null
           : CustomAppBar(
-              onSearchTap: _showCityInputDialog,
+              onSearchTap: _showCityInputBottomSheet,
               onToggleFavorite: _toggleFavorite,
               onShowFavorites: _showFavoritesSheet,
               onToggleUnits: _toggleUnitsSetting,
