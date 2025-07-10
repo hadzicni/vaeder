@@ -6,6 +6,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onSearchTap;
   final VoidCallback onToggleFavorite;
   final VoidCallback onShowFavorites;
+  final Map<String, String> favoriteCities;
   final VoidCallback onToggleUnits;
   final VoidCallback onShowAbout;
   final VoidCallback onOpenForecast;
@@ -16,6 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onSearchTap,
     required this.onToggleFavorite,
     required this.onShowFavorites,
+    required this.favoriteCities,
     required this.onToggleUnits,
     required this.onShowAbout,
     required this.onOpenForecast,
@@ -72,17 +74,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ),
-        IconButton(
-          onPressed: onShowFavorites,
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+        if (favoriteCities.isNotEmpty)
+          IconButton(
+            onPressed: onShowFavorites,
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.list, color: Colors.white, size: 20),
             ),
-            child: const Icon(Icons.list, color: Colors.white, size: 20),
           ),
-        ),
         Container(
           margin: const EdgeInsets.only(right: 16),
           child: PopupMenuButton<String>(

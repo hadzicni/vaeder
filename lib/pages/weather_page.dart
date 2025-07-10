@@ -28,7 +28,7 @@ class _WeatherPageState extends State<WeatherPage>
   final _weatherService = WeatherService('0bd21cf6023274a9818128f4eb1f4c79');
   Weather? _weather;
   String? _currentLocationCity;
-  List<String> _favoriteCities = [];
+  Map<String, String> _favoriteCities = {};
   String _units = 'metric';
   bool _isLoading = true;
   late AnimationController _slideController;
@@ -135,14 +135,23 @@ class _WeatherPageState extends State<WeatherPage>
 
   Future<void> _loadFavorites() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _favoriteCities = prefs.getStringList('favoriteCities') ?? [];
-    });
+    final stored = prefs.getStringList('favoriteCities') ?? [];
+    final map = <String, String>{};
+    for (final entry in stored) {
+      final parts = entry.split('|');
+      if (parts.length == 2) {
+        map[parts[0]] = parts[1]; // city → country
+      }
+    }
+    setState(() => _favoriteCities = map);
   }
 
   Future<void> _saveFavorites() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('favoriteCities', _favoriteCities);
+    final list = _favoriteCities.entries
+        .map((e) => '${e.key}|${e.value}')
+        .toList();
+    await prefs.setStringList('favoriteCities', list);
   }
 
   Future<void> _loadUnits() async {
@@ -160,8 +169,10 @@ class _WeatherPageState extends State<WeatherPage>
   Future<void> _toggleFavorite() async {
     if (_weather == null) return;
     final city = _weather!.cityName;
+    final country = _weather!.country;
+
     setState(() {
-      if (_favoriteCities.contains(city)) {
+      if (_favoriteCities.containsKey(city)) {
         _favoriteCities.remove(city);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -175,7 +186,7 @@ class _WeatherPageState extends State<WeatherPage>
           ),
         );
       } else {
-        _favoriteCities.add(city);
+        _favoriteCities[city] = country;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Added $city to favorites'),
@@ -250,8 +261,10 @@ class _WeatherPageState extends State<WeatherPage>
                   style: TextStyle(color: Colors.white.withOpacity(0.7)),
                 )
               else
-                ..._favoriteCities.map(
-                  (city) => Dismissible(
+                ..._favoriteCities.entries.map((entry) {
+                  final city = entry.key;
+                  final country = entry.value;
+                  return Dismissible(
                     key: ValueKey(city),
                     direction: DismissDirection.endToStart,
                     background: Container(
@@ -264,9 +277,7 @@ class _WeatherPageState extends State<WeatherPage>
                       child: const Icon(Icons.delete, color: Colors.white),
                     ),
                     onDismissed: (_) {
-                      setState(() {
-                        _favoriteCities.remove(city);
-                      });
+                      setState(() => _favoriteCities.remove(city));
                       _saveFavorites();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -282,7 +293,7 @@ class _WeatherPageState extends State<WeatherPage>
                     },
                     child: ListTile(
                       title: Text(
-                        city,
+                        '$city, $country',
                         style: const TextStyle(color: Colors.white),
                       ),
                       onTap: () {
@@ -290,8 +301,8 @@ class _WeatherPageState extends State<WeatherPage>
                         _fetchWeatherForCity(city);
                       },
                     ),
-                  ),
-                ),
+                  );
+                }),
             ],
           ),
         );
@@ -564,7 +575,8 @@ class _WeatherPageState extends State<WeatherPage>
               onOpenForecast: _openForecastPage,
               isFavorite:
                   _weather != null &&
-                  _favoriteCities.contains(_weather!.cityName),
+                  _favoriteCities.containsKey(_weather!.cityName),
+              favoriteCities: _favoriteCities,
             ),
 
       body: _isLoading
