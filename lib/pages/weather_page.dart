@@ -686,7 +686,6 @@ class _WeatherPageState extends State<WeatherPage>
   Widget _buildTemperatureCard() {
     return TemperatureCard(
       temperature: _weather!.temperature,
-      condition: _weather!.mainCondition,
       unitSymbol: _units == 'metric' ? 'C' : 'F',
     );
   }

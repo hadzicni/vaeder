@@ -99,20 +99,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: const Icon(Icons.more_vert, color: Colors.white, size: 20),
             ),
             onSelected: (value) {
-              if (value == 'forecast') onOpenForecast();
               if (value == 'about') onShowAbout();
+              if (value == 'forecast') onOpenForecast();
               if (value == 'units') onToggleUnits();
             },
             itemBuilder: (context) => [
               PopupMenuItem<String>(
-                value: 'forecast',
-                padding: EdgeInsets.zero,
-                child: _buildMenuItem(Icons.calendar_today, 'Forecast'),
-              ),
-              PopupMenuItem<String>(
                 value: 'about',
                 padding: EdgeInsets.zero,
                 child: _buildMenuItem(Icons.info_outline, 'About'),
+              ),
+              PopupMenuItem<String>(
+                value: 'forecast',
+                padding: EdgeInsets.zero,
+                child: _buildMenuItem(Icons.calendar_today, 'Forecast'),
               ),
               PopupMenuItem<String>(
                 value: 'units',
