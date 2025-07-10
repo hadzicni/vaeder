@@ -33,26 +33,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Container(color: Colors.transparent),
         ),
       ),
-      leadingWidth: 180,
-      leading: Container(
-        margin: const EdgeInsets.only(left: 12),
-        child: TextButton.icon(
-          onPressed: onSearchTap,
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            backgroundColor: Colors.white.withOpacity(0.2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+      leadingWidth: 200,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 12),
+        child: Center(
+          child: TextButton.icon(
+            onPressed: onSearchTap,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              backgroundColor: Colors.white.withOpacity(0.2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-          ),
-          icon: const Icon(Icons.search, size: 20),
-          label: const Text(
-            'Search location',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            icon: const Icon(Icons.search, size: 20),
+            label: const Text(
+              'Search location',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
           ),
         ),
       ),
+
       actions: [
         IconButton(
           onPressed: onToggleFavorite,
