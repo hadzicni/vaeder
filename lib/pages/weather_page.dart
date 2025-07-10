@@ -1,11 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vaeder/models/weather_model.dart';
 import 'package:vaeder/services/weather_service.dart';
 
 import '../utils/weather_utils.dart';
+import '../widgets/custom_app_bar.dart';
 import '../widgets/error_display.dart';
 import '../widgets/footer.dart';
 import '../widgets/forecast_button.dart';
@@ -588,268 +587,41 @@ class _WeatherPageState extends State<WeatherPage>
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(color: Colors.transparent),
-          ),
-        ),
-        leadingWidth: 180,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 12),
-          child: TextButton.icon(
-            onPressed: _showCityInputDialog,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              backgroundColor: Colors.white.withOpacity(0.2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+      appBar: _isLoading
+          ? null
+          : CustomAppBar(
+              onSearchTap: _showCityInputDialog,
+              onToggleFavorite: _toggleFavorite,
+              onShowFavorites: _showFavoritesSheet,
+              onToggleUnits: _toggleUnitsSetting,
+              onShowAbout: _showAboutDialog,
+              onOpenForecast: _openForecastPage,
+              isFavorite:
+                  _weather != null &&
+                  _favoriteCities.contains(_weather!.cityName),
             ),
-            icon: const Icon(Icons.search, size: 20),
-            label: const Text(
-              'Search location',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ),
 
-        actions: [
-          IconButton(
-            onPressed: _toggleFavorite,
-            icon: Container(
-              padding: const EdgeInsets.all(8),
+      body: _isLoading
+          ? Container(
+              color: const Color(0xFF0F172A),
+              alignment: Alignment.center,
+              child: const LoadingWidget(),
+            )
+          : Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                _weather != null && _favoriteCities.contains(_weather!.cityName)
-                    ? Icons.star
-                    : Icons.star_border,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: _showFavoritesSheet,
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.list, color: Colors.white, size: 20),
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                popupMenuTheme: PopupMenuThemeData(
-                  color: Colors.transparent,
-                  elevation: 0,
-                  surfaceTintColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0),
-                  ),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: _getBackgroundColors(),
                 ),
               ),
-              child: PopupMenuButton<String>(
-                color: Colors.transparent,
-                elevation: 0,
-                surfaceTintColor: Colors.transparent,
-                offset: const Offset(0, 40),
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    border: Border.all(color: Colors.white.withOpacity(0.3)),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.more_vert,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                onSelected: (value) {
-                  if (value == 'about') {
-                    _showAboutDialog();
-                  } else if (value == 'units') {
-                    _toggleUnitsSetting();
-                  } else if (value == 'forecast') {
-                    _openForecastPage();
-                  }
-                },
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem<String>(
-                    value: 'forecast',
-                    padding: EdgeInsets.zero,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.calendar_today,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                        title: Text(
-                          'Forecast',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _openForecastPage();
-                        },
-                      ),
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'about',
-                    padding: EdgeInsets.zero,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.info_outline,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                        title: Text(
-                          'About',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _showAboutDialog();
-                        },
-                      ),
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'units',
-                    padding: EdgeInsets.zero,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.thermostat,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                        title: Text(
-                          _units == 'metric'
-                              ? 'Switch to Fahrenheit'
-                              : 'Switch to Celsius',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _toggleUnitsSetting();
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+              child: SafeArea(
+                child: _weather == null
+                    ? _buildErrorWidget()
+                    : _buildWeatherContent(),
               ),
             ),
-          ),
-        ],
-      ),
-
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: _getBackgroundColors(),
-          ),
-        ),
-        child: SafeArea(
-          child: _isLoading
-              ? _buildLoadingWidget()
-              : _weather == null
-              ? _buildErrorWidget()
-              : _buildWeatherContent(),
-        ),
-      ),
     );
-  }
-
-  Widget _buildLoadingWidget() {
-    return const LoadingWidget();
   }
 
   Widget _buildErrorWidget() {
