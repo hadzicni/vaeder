@@ -590,12 +590,10 @@ class _WeatherPageState extends State<WeatherPage>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        flexibleSpace: ClipRRect(
+        flexibleSpace: ClipRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              color: Colors.white.withOpacity(0.05),
-            ),
+            child: Container(color: Colors.transparent),
           ),
         ),
         leadingWidth: 180,
@@ -651,7 +649,7 @@ class _WeatherPageState extends State<WeatherPage>
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: PopupMenuButton<String>(
-              color: Colors.transparent,
+              color: Colors.white.withOpacity(0.15),
               elevation: 0,
               surfaceTintColor: Colors.transparent,
               offset: const Offset(0, 40),
@@ -685,9 +683,9 @@ class _WeatherPageState extends State<WeatherPage>
                     margin: const EdgeInsets.symmetric(horizontal: 8),
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(color: Colors.white.withOpacity(0.3)),
                     ),
                     child: ListTile(
                       leading: Icon(
@@ -721,9 +719,9 @@ class _WeatherPageState extends State<WeatherPage>
                     margin: const EdgeInsets.symmetric(horizontal: 8),
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(color: Colors.white.withOpacity(0.3)),
                     ),
                     child: ListTile(
                       leading: Icon(
@@ -757,9 +755,9 @@ class _WeatherPageState extends State<WeatherPage>
                     margin: const EdgeInsets.symmetric(horizontal: 8),
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(color: Colors.white.withOpacity(0.3)),
                     ),
                     child: ListTile(
                       leading: Icon(
