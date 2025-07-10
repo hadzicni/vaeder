@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vaeder/models/weather_model.dart';
 import 'package:vaeder/services/weather_service.dart';
@@ -9,6 +10,7 @@ import '../widgets/footer.dart';
 import '../widgets/header.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/reset_location_button.dart';
+import '../widgets/forecast_button.dart';
 import '../widgets/temperature_card.dart';
 import '../widgets/weather_animation.dart';
 import '../widgets/weather_details.dart';
@@ -29,7 +31,6 @@ class _WeatherPageState extends State<WeatherPage>
   List<String> _favoriteCities = [];
   String _units = 'metric';
   bool _isLoading = true;
-  late PageController _pageController;
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late AnimationController _scaleController;
@@ -40,7 +41,6 @@ class _WeatherPageState extends State<WeatherPage>
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
     _initializeAnimations();
     _loadUnits();
     _loadFavorites();
@@ -77,7 +77,6 @@ class _WeatherPageState extends State<WeatherPage>
 
   @override
   void dispose() {
-    _pageController.dispose();
     _slideController.dispose();
     _fadeController.dispose();
     _scaleController.dispose();
@@ -202,6 +201,21 @@ class _WeatherPageState extends State<WeatherPage>
       await _fetchWeatherForCity(_weather!.cityName);
     } else {
       await _fetchWeather();
+    }
+  }
+
+  void _openForecastPage() {
+    if (_weather != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ForecastPage(
+            city: _weather!.cityName,
+            units: _units,
+            backgroundColors: _getBackgroundColors(),
+          ),
+        ),
+      );
     }
   }
 
@@ -576,6 +590,14 @@ class _WeatherPageState extends State<WeatherPage>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        flexibleSpace: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              color: Colors.white.withOpacity(0.05),
+            ),
+          ),
+        ),
         leadingWidth: 180,
         leading: Container(
           margin: const EdgeInsets.only(left: 12),
@@ -600,16 +622,31 @@ class _WeatherPageState extends State<WeatherPage>
         actions: [
           IconButton(
             onPressed: _toggleFavorite,
-            icon: Icon(
-              _weather != null && _favoriteCities.contains(_weather!.cityName)
-                  ? Icons.star
-                  : Icons.star_border,
-              color: Colors.white,
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                _weather != null && _favoriteCities.contains(_weather!.cityName)
+                    ? Icons.star
+                    : Icons.star_border,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           IconButton(
             onPressed: _showFavoritesSheet,
-            icon: const Icon(Icons.list, color: Colors.white),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.list, color: Colors.white, size: 20),
+            ),
           ),
           Container(
             margin: const EdgeInsets.only(right: 16),
@@ -622,6 +659,7 @@ class _WeatherPageState extends State<WeatherPage>
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
+                  border: Border.all(color: Colors.white.withOpacity(0.3)),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -636,18 +674,7 @@ class _WeatherPageState extends State<WeatherPage>
                 } else if (value == 'units') {
                   _toggleUnitsSetting();
                 } else if (value == 'forecast') {
-                  if (_weather != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ForecastPage(
-                          city: _weather!.cityName,
-                          units: _units,
-                          backgroundColors: _getBackgroundColors(),
-                        ),
-                      ),
-                    );
-                  }
+                  _openForecastPage();
                 }
               },
               itemBuilder: (BuildContext context) => [
@@ -656,10 +683,11 @@ class _WeatherPageState extends State<WeatherPage>
                   padding: EdgeInsets.zero,
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 8),
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
                     child: ListTile(
                       leading: Icon(
@@ -681,18 +709,7 @@ class _WeatherPageState extends State<WeatherPage>
                       ),
                       onTap: () {
                         Navigator.pop(context);
-                        if (_weather != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ForecastPage(
-                                city: _weather!.cityName,
-                                units: _units,
-                                backgroundColors: _getBackgroundColors(),
-                              ),
-                            ),
-                          );
-                        }
+                        _openForecastPage();
                       },
                     ),
                   ),
@@ -702,10 +719,11 @@ class _WeatherPageState extends State<WeatherPage>
                   padding: EdgeInsets.zero,
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 8),
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
                     child: ListTile(
                       leading: Icon(
@@ -737,10 +755,11 @@ class _WeatherPageState extends State<WeatherPage>
                   padding: EdgeInsets.zero,
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 8),
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
                     child: ListTile(
                       leading: Icon(
@@ -787,19 +806,8 @@ class _WeatherPageState extends State<WeatherPage>
           child: _isLoading
               ? _buildLoadingWidget()
               : _weather == null
-              ? _buildErrorWidget()
-              : PageView(
-                  controller: _pageController,
-                  children: [
-                    _buildWeatherContent(),
-                    ForecastPage(
-                      city: _weather!.cityName,
-                      units: _units,
-                      showBack: false,
-                      backgroundColors: _getBackgroundColors(),
-                    ),
-                  ],
-                ),
+                  ? _buildErrorWidget()
+                  : _buildWeatherContent(),
         ),
       ),
     );
@@ -839,6 +847,8 @@ class _WeatherPageState extends State<WeatherPage>
                 _buildTemperatureCard(),
                 const SizedBox(height: 24),
                 _buildWeatherDetails(),
+                const SizedBox(height: 24),
+                ForecastButton(onTap: _openForecastPage),
                 const SizedBox(height: 32),
                 if (_currentLocationCity != null &&
                     _weather?.cityName.trim().toLowerCase() !=
