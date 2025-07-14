@@ -648,10 +648,8 @@ class _WeatherPageState extends State<WeatherPage>
                 _buildTemperatureCard(),
                 const SizedBox(height: 24),
                 _buildWeatherDetails(),
-                if (_uvIndex != null) ...[
-                  const SizedBox(height: 24),
-                  _buildUvIndexTile(),
-                ],
+                const SizedBox(height: 24),
+                _buildUvIndexTile(),
                 const SizedBox(height: 24),
                 ForecastButton(onTap: _openForecastPage),
                 const SizedBox(height: 32),
@@ -697,7 +695,7 @@ class _WeatherPageState extends State<WeatherPage>
   }
 
   Widget _buildUvIndexTile() {
-    return UvIndexTile(uvIndex: _uvIndex ?? 0);
+    return UvIndexTile(uvIndex: _uvIndex);
   }
 
   Widget _buildResetToCurrentLocationButton() {

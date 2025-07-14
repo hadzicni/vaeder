@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class UvIndexTile extends StatelessWidget {
-  final double uvIndex;
+  final double? uvIndex;
   const UvIndexTile({super.key, required this.uvIndex});
 
   @override
@@ -37,7 +37,7 @@ class UvIndexTile extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            'UV Index: ${uvIndex.toStringAsFixed(1)}',
+            'UV Index: ${uvIndex != null ? uvIndex!.toStringAsFixed(1) : 'N/A'}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
