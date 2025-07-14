@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class ErrorDisplay extends StatelessWidget {
   final VoidCallback onRetry;
+  final String message;
 
-  const ErrorDisplay({super.key, required this.onRetry});
+  const ErrorDisplay({super.key, required this.onRetry, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class ErrorDisplay extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Failed to load weather data',
+            message,
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
               fontSize: 16,
