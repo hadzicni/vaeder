@@ -72,6 +72,29 @@ class WeatherService {
     }
   }
 
+  Future<double> getUvIndex(String cityName) async {
+    final geoRes = await http.get(
+      Uri.parse(
+          'https://api.openweathermap.org/geo/1.0/direct?q=${Uri.encodeComponent(cityName)}&limit=1&appid=$apiKey'),
+    );
+    if (geoRes.statusCode == 200) {
+      final geoData = jsonDecode(geoRes.body);
+      if (geoData is List && geoData.isNotEmpty) {
+        final lat = geoData[0]['lat'];
+        final lon = geoData[0]['lon'];
+        final uvRes = await http.get(
+          Uri.parse(
+              'https://api.openweathermap.org/data/2.5/onecall?lat=$lat&lon=$lon&exclude=minutely,hourly,daily,alerts&appid=$apiKey'),
+        );
+        if (uvRes.statusCode == 200) {
+          final data = jsonDecode(uvRes.body) as Map<String, dynamic>;
+          return (data['current']['uvi'] as num).toDouble();
+        }
+      }
+    }
+    throw Exception('Failed to load UV index');
+  }
+
   Future<String> getCurrentCity() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
