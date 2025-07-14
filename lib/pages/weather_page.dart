@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:vaeder/models/weather_model.dart';
 import 'package:vaeder/services/weather_service.dart';
 
@@ -33,6 +34,7 @@ class _WeatherPageState extends State<WeatherPage>
   String _units = 'metric';
   double? _uvIndex;
   bool _isLoading = true;
+  String _errorMessage = 'Failed to load weather data';
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late AnimationController _scaleController;
@@ -77,6 +79,11 @@ class _WeatherPageState extends State<WeatherPage>
     );
   }
 
+  Future<bool> _hasInternet() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    return connectivityResult != ConnectivityResult.none;
+  }
+
   @override
   void dispose() {
     _slideController.dispose();
@@ -88,7 +95,20 @@ class _WeatherPageState extends State<WeatherPage>
   Future<void> _fetchWeather() async {
     setState(() {
       _isLoading = true;
+      _errorMessage = 'Failed to load weather data';
     });
+
+    if (!await _hasInternet()) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _weather = null;
+          _errorMessage = 'No internet connection';
+        });
+        _showErrorSnackbar('No internet connection');
+      }
+      return;
+    }
 
     try {
       final cityName = await _weatherService.getCurrentCity();
@@ -106,13 +126,18 @@ class _WeatherPageState extends State<WeatherPage>
           _weather = weather;
           _uvIndex = uv;
           _isLoading = false;
+          _errorMessage = 'Failed to load weather data';
         });
 
         _startAnimations();
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _weather = null;
+          _errorMessage = 'Failed to load weather data';
+        });
         _showErrorSnackbar('Error fetching weather data');
       }
     }
@@ -413,7 +438,20 @@ class _WeatherPageState extends State<WeatherPage>
   Future<void> _fetchWeatherForCity(String city) async {
     setState(() {
       _isLoading = true;
+      _errorMessage = 'Failed to load weather data';
     });
+
+    if (!await _hasInternet()) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _weather = null;
+          _errorMessage = 'No internet connection';
+        });
+        _showErrorSnackbar('No internet connection');
+      }
+      return;
+    }
 
     try {
       final weather = await _weatherService.getWeather(city, units: _units);
@@ -449,7 +487,11 @@ class _WeatherPageState extends State<WeatherPage>
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _weather = null;
+          _errorMessage = 'Failed to load weather data';
+        });
         _showErrorSnackbar('City not found');
       }
     }
@@ -619,7 +661,7 @@ class _WeatherPageState extends State<WeatherPage>
   }
 
   Widget _buildErrorWidget() {
-    return ErrorDisplay(onRetry: _fetchWeather);
+    return ErrorDisplay(onRetry: _fetchWeather, message: _errorMessage);
   }
 
   Widget _buildWeatherContent() {
