@@ -93,7 +93,12 @@ class _WeatherPageState extends State<WeatherPage>
     try {
       final cityName = await _weatherService.getCurrentCity();
       final weather = await _weatherService.getWeather(cityName, units: _units);
-      final uv = await _weatherService.getUvIndex(cityName);
+      double? uv;
+      try {
+        uv = await _weatherService.getUvIndex(cityName);
+      } catch (_) {
+        uv = null;
+      }
 
       if (mounted) {
         setState(() {
@@ -412,7 +417,12 @@ class _WeatherPageState extends State<WeatherPage>
 
     try {
       final weather = await _weatherService.getWeather(city, units: _units);
-      final uv = await _weatherService.getUvIndex(city);
+      double? uv;
+      try {
+        uv = await _weatherService.getUvIndex(city);
+      } catch (_) {
+        uv = null;
+      }
 
       if (mounted) {
         setState(() {
