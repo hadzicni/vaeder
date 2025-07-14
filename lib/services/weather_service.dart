@@ -84,11 +84,11 @@ class WeatherService {
         final lon = geoData[0]['lon'];
         final uvRes = await http.get(
           Uri.parse(
-              'https://api.openweathermap.org/data/2.5/onecall?lat=$lat&lon=$lon&exclude=minutely,hourly,daily,alerts&appid=$apiKey'),
+              'https://api.openweathermap.org/data/2.5/uvi?lat=$lat&lon=$lon&appid=$apiKey'),
         );
         if (uvRes.statusCode == 200) {
           final data = jsonDecode(uvRes.body) as Map<String, dynamic>;
-          return (data['current']['uvi'] as num).toDouble();
+          return (data['value'] as num).toDouble();
         }
       }
     }
