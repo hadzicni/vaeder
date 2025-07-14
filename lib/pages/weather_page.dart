@@ -14,6 +14,7 @@ import '../widgets/reset_location_button.dart';
 import '../widgets/temperature_card.dart';
 import '../widgets/weather_animation.dart';
 import '../widgets/weather_details.dart';
+import '../widgets/uv_index_tile.dart';
 import 'forecast_page.dart';
 
 class WeatherPage extends StatefulWidget {
@@ -30,6 +31,7 @@ class _WeatherPageState extends State<WeatherPage>
   String? _currentLocationCity;
   Map<String, String> _favoriteCities = {};
   String _units = 'metric';
+  double? _uvIndex;
   bool _isLoading = true;
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -91,11 +93,18 @@ class _WeatherPageState extends State<WeatherPage>
     try {
       final cityName = await _weatherService.getCurrentCity();
       final weather = await _weatherService.getWeather(cityName, units: _units);
+      double? uv;
+      try {
+        uv = await _weatherService.getUvIndex(cityName);
+      } catch (_) {
+        uv = null;
+      }
 
       if (mounted) {
         setState(() {
           _currentLocationCity = cityName;
           _weather = weather;
+          _uvIndex = uv;
           _isLoading = false;
         });
 
@@ -408,10 +417,17 @@ class _WeatherPageState extends State<WeatherPage>
 
     try {
       final weather = await _weatherService.getWeather(city, units: _units);
+      double? uv;
+      try {
+        uv = await _weatherService.getUvIndex(city);
+      } catch (_) {
+        uv = null;
+      }
 
       if (mounted) {
         setState(() {
           _weather = weather;
+          _uvIndex = uv;
           _isLoading = false;
         });
 
@@ -633,6 +649,8 @@ class _WeatherPageState extends State<WeatherPage>
                 const SizedBox(height: 24),
                 _buildWeatherDetails(),
                 const SizedBox(height: 24),
+                _buildUvIndexTile(),
+                const SizedBox(height: 24),
                 ForecastButton(onTap: _openForecastPage),
                 const SizedBox(height: 32),
                 if (_currentLocationCity != null &&
@@ -674,6 +692,10 @@ class _WeatherPageState extends State<WeatherPage>
       condition: _weather!.mainCondition,
       unitSymbol: _units == 'metric' ? 'C' : 'F',
     );
+  }
+
+  Widget _buildUvIndexTile() {
+    return UvIndexTile(uvIndex: _uvIndex);
   }
 
   Widget _buildResetToCurrentLocationButton() {
