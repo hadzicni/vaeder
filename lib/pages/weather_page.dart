@@ -718,7 +718,10 @@ class _WeatherPageState extends State<WeatherPage>
   }
 
   Widget _buildWeatherAnimation() {
-    return WeatherAnimation(condition: _weather?.mainCondition);
+    return WeatherAnimation(
+      condition: _weather?.mainCondition,
+      iconCode: _weather?.iconCode,
+    );
   }
 
   Widget _buildTemperatureCard() {

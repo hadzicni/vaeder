@@ -4,8 +4,9 @@ import '../utils/weather_utils.dart';
 
 class WeatherAnimation extends StatelessWidget {
   final String? condition;
+  final String? iconCode;
 
-  const WeatherAnimation({super.key, required this.condition});
+  const WeatherAnimation({super.key, required this.condition, required this.iconCode});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class WeatherAnimation extends StatelessWidget {
         ],
       ),
       child: Lottie.asset(
-        getWeatherAnimation(condition),
+        getWeatherAnimation(condition, iconCode: iconCode),
         width: 180,
         height: 180,
       ),
