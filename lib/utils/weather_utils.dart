@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-String getWeatherAnimation(String? mainCondition) {
-  if (mainCondition == null) return 'assets/sunny.json';
+String getWeatherAnimation(String? mainCondition, {required bool isDaytime}) {
+  if (mainCondition == null) {
+    return isDaytime ? 'assets/sunny.json' : 'assets/moon.json';
+  }
   switch (mainCondition.toLowerCase()) {
     case 'clouds':
       return 'assets/cloud.json';
@@ -18,9 +20,9 @@ String getWeatherAnimation(String? mainCondition) {
     case 'thunderstorm':
       return 'assets/thunder.json';
     case 'clear':
-      return 'assets/sunny.json';
+      return isDaytime ? 'assets/sunny.json' : 'assets/moon.json';
     default:
-      return 'assets/sunny.json';
+      return isDaytime ? 'assets/sunny.json' : 'assets/moon.json';
   }
 }
 
